@@ -1,0 +1,7 @@
+spring:
+  data:
+    redis:
+      host: localhost
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
