@@ -25,7 +25,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
     ) throws IOException, ServletException {
         ErrorCode code = ErrorCode.FORBIDDEN;
 
-        CustomResponse<Void> body = CustomResponse.fail(
+        CustomResponse<Void> body = CustomResponse.failBody(
                 ApiError.of(code.name(), code.message)
         );
 

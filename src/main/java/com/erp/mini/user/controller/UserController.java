@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +35,7 @@ public class UserController {
     public ResponseEntity<CustomResponse<Void>> addUser(@Valid @RequestBody AddUserRequest request) {
         userService.addUser(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CustomResponse.ok());
+        return CustomResponse.created();
     }
 
     @Operation(summary = "비밀번호 초기화", description = "비밀번호를 초기화한다.")
@@ -50,8 +48,7 @@ public class UserController {
     public ResponseEntity<CustomResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         userService.resetPassword(request);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(CustomResponse.ok());
+        return CustomResponse.ok();
     }
 
     @Operation(summary = "비밀번호 변경", description = "비밀번호를 변경한다.")
@@ -68,7 +65,6 @@ public class UserController {
     ) {
         userService.updatePassword(userDetails.getUserId(), request);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(CustomResponse.ok());
+        return CustomResponse.ok();
     }
 }
