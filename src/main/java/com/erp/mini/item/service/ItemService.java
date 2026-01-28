@@ -11,4 +11,10 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
 
+    // 등록
+
+    // 삭제
+
+    // 조회 (Prefix(인덱스 활용) + like)
+
 }

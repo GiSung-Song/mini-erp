@@ -11,7 +11,8 @@ import java.math.BigDecimal;
 @Entity
 @Table(
         name = "items",
-        uniqueConstraints = {@UniqueConstraint(name = "uq_items_code", columnNames = {"code"})}
+        uniqueConstraints = {@UniqueConstraint(name = "uq_items_code", columnNames = {"code"})},
+        indexes = @Index(name = "idx_items_name", columnList = "name")
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

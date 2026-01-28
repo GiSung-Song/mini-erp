@@ -25,7 +25,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     ) throws IOException, ServletException {
         ErrorCode code = ErrorCode.UNAUTHORIZED;
 
-        CustomResponse<Void> body = CustomResponse.fail(
+        CustomResponse<Void> body = CustomResponse.failBody(
                 ApiError.of(code.name(), code.message)
         );
 
