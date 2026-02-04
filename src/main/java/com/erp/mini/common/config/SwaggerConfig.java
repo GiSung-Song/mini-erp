@@ -2,6 +2,8 @@ package com.erp.mini.common.config;
 
 import com.erp.mini.common.response.ErrorResponse;
 import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -17,6 +19,11 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
+@OpenAPIDefinition(
+        security = {
+                @SecurityRequirement(name = "sessionAuth")
+        }
+)
 @Configuration
 public class SwaggerConfig {
 

@@ -45,4 +45,12 @@ public class Item extends BaseEntity {
     public static Item createItem(String name, String code, BigDecimal basePrice, ItemStatus status) {
         return new Item(name, code, basePrice, status);
     }
+
+    public void deactivate() {
+        this.status = ItemStatus.INACTIVE;
+    }
+
+    public void changePrice(BigDecimal basePrice) {
+        this.basePrice = basePrice;
+    }
 }

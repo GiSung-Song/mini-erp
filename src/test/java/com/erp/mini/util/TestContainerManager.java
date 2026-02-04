@@ -15,8 +15,18 @@ public class TestContainerManager {
     public static final GenericContainer<?> REDIS = new GenericContainer<>(DockerImageName.parse("redis:latest"))
             .withExposedPorts(6379);
 
-    static {
-        MYSQL.start();
+
+    private static volatile boolean mysqlStarted = false;
+
+    public static void startMySQL() {
+        if (!mysqlStarted) {
+            synchronized (TestContainerManager.class) {
+                if (!mysqlStarted) {
+                    MYSQL.start();
+                    mysqlStarted = true;
+                }
+            }
+        }
     }
 
     public static void startRedis() {
@@ -26,6 +36,7 @@ public class TestContainerManager {
     }
 
     public static void registerMySQL(DynamicPropertyRegistry registry) {
+        startMySQL();
         registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
         registry.add("spring.datasource.username", MYSQL::getUsername);
         registry.add("spring.datasource.password", MYSQL::getPassword);
@@ -33,6 +44,7 @@ public class TestContainerManager {
     }
 
     public static void registerRedis(DynamicPropertyRegistry registry) {
+        startRedis();
         registry.add("spring.data.redis.host", REDIS::getHost);
         registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
     }
