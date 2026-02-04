@@ -25,10 +25,9 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "사용자 생성", description = "사용자를 등록한다.")
+    @Operation(summary = "사용자 생성", description = "사용자를 등록한다.", security = @SecurityRequirement(name = ""))
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "등록 성공"),
-            @ApiResponse(responseCode = "400", description = "필수값 누락"),
             @ApiResponse(responseCode = "409", description = "사번 중복")
     })
     @PostMapping
@@ -38,10 +37,9 @@ public class UserController {
         return CustomResponse.created();
     }
 
-    @Operation(summary = "비밀번호 초기화", description = "비밀번호를 초기화한다.")
+    @Operation(summary = "비밀번호 초기화", description = "비밀번호를 초기화한다.", security = @SecurityRequirement(name = ""))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "초기화 성공"),
-            @ApiResponse(responseCode = "400", description = "필수값 누락"),
             @ApiResponse(responseCode = "404", description = "사용자 없음")
     })
     @PatchMapping("/password-reset")
@@ -54,10 +52,8 @@ public class UserController {
     @Operation(summary = "비밀번호 변경", description = "비밀번호를 변경한다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "변경 성공"),
-            @ApiResponse(responseCode = "400", description = "필수값 누락 / 현재 비밀번호 틀림"),
             @ApiResponse(responseCode = "404", description = "사용자 없음")
     })
-    @SecurityRequirement(name = "sessionAuth")
     @PatchMapping("/password-update")
     public ResponseEntity<CustomResponse<Void>> updatePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
