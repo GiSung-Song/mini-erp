@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface PartnerRepository extends JpaRepository<Partner, Long> {
+public interface PartnerRepository extends JpaRepository<Partner, Long>, PartnerRepositoryCustom {
     Optional<Partner> findByCode(String code);
     boolean existsByCode(String code);
 }

@@ -21,6 +21,7 @@ public record AddItemRequest(
         @Digits(integer = 13, fraction = 2)
         BigDecimal basePrice,
 
+        @Schema(description = "상품 상태", example = "ACTIVE")
         @NotNull(message = "상품 상태는 필수입니다.")
         ItemStatus itemStatus
 ) {
