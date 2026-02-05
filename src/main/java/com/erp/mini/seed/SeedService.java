@@ -87,23 +87,25 @@ public class SeedService {
 
     private void seedTestSupplier() {
         if (partnerRepository.existsByCode(SUPPLIER_CODE)) return;
-        partnerRepository.save(
+        Partner supplier = partnerRepository.save(
                 Partner.createPartner(
-                        "테스트 공급사", SUPPLIER_CODE,
-                        PartnerType.SUPPLIER, "01012344321",
-                        "test@supplier.com"
+                        "테스트 공급사", PartnerType.SUPPLIER,
+                        "01012344321", "test@supplier.com"
                 )
         );
+
+        supplier.generateCode();
     }
 
     private void seedTestCustomer() {
         if (partnerRepository.existsByCode(CUSTOMER_CODE)) return;
-        partnerRepository.save(
+        Partner customer = partnerRepository.save(
                 Partner.createPartner(
-                        "테스트 고객사", CUSTOMER_CODE,
-                        PartnerType.CUSTOMER, "01043211234",
-                        "test@customer.com"
+                        "테스트 고객사", PartnerType.CUSTOMER,
+                        "01043211234", "test@customer.com"
                 )
         );
+
+        customer.generateCode();
     }
 }
