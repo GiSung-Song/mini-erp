@@ -35,6 +35,18 @@ VALUES (
 )
 ON DUPLICATE KEY UPDATE id = id;
 
+INSERT INTO warehouses (id, name, code, location, status, created_by, updated_by)
+VALUES (
+    2,
+    '테스트 2창고',
+    'WH_TEST2',
+    '테스트시 테스트구 테스트동 테스트지역 56-78',
+    'INACTIVE',
+    1,
+    1
+)
+ON DUPLICATE KEY UPDATE id = id;
+
 -- 공급사
 INSERT INTO partners (id, name, code, type, phone, email, created_by, updated_by)
 VALUES (

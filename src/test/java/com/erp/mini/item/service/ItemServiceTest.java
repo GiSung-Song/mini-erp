@@ -67,7 +67,7 @@ class ItemServiceTest {
                     item.getName().equals(request.name())
                             && item.getCode().equals("IC000001")
                             && item.getBasePrice().equals(BigDecimal.valueOf(15000.00))
-                            && item.getStatus().equals(ItemStatus.ACTIVE)));
+                            && item.getStatus() == ItemStatus.ACTIVE));
         }
     }
 

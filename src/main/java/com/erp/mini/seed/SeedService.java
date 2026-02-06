@@ -10,6 +10,7 @@ import com.erp.mini.partner.repo.PartnerRepository;
 import com.erp.mini.user.domain.User;
 import com.erp.mini.user.repo.UserRepository;
 import com.erp.mini.warehouse.domain.Warehouse;
+import com.erp.mini.warehouse.domain.WarehouseStatus;
 import com.erp.mini.warehouse.repo.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -77,12 +78,15 @@ public class SeedService {
     private void seedTestWarehouse() {
         if (warehouseRepository.existsByCode(WH_CODE)) return;
 
-        warehouseRepository.save(
+        Warehouse warehouse = warehouseRepository.save(
                 Warehouse.createWarehouse(
-                        "테스트 1창고", WH_CODE,
-                        "테스트시 테스트구 테스트동 테스트지역 12-34"
+                        "테스트 1창고",
+                        "테스트시 테스트구 테스트동 테스트지역 12-34",
+                        WarehouseStatus.ACTIVE
                 )
         );
+
+        warehouse.generateCode();
     }
 
     private void seedTestSupplier() {
