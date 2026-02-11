@@ -65,4 +65,10 @@ public class Warehouse extends BaseEntity {
             this.status = WarehouseStatus.INACTIVE;
         }
     }
+
+    public void ensureAvailable() {
+        if (this.status == WarehouseStatus.INACTIVE) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "해당 창고는 비활성화 상태입니다.");
+        }
+    }
 }

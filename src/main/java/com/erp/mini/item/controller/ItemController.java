@@ -69,7 +69,6 @@ public class ItemController {
     }
 
     // 상품 상세 조회
-    // TODO: 추후에 입고, 출고, 재고 등 도메인 로직 완성되면 테스트 예정
     @Operation(summary = "상품 상세 조회", description = "상품을 상세 조회한다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공")

@@ -1,5 +1,5 @@
 package com.erp.mini.purchase.domain;
 
 public enum PurchaseStatus {
-    CREATED, CANCELLED, COMPLETED
+    CREATED, CANCELLED, ORDERED, RECEIVED
 }

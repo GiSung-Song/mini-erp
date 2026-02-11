@@ -1,5 +1,6 @@
 package com.erp.mini.common.security;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -12,6 +13,7 @@ import java.util.Optional;
 // auditorAware 라는 bean으로 등록
 // 등록하지 않으면 @EnableJpaAuditing(auditorAwareRef = "SecurityAuditorAware") 설정해야함.
 @Component("auditorAware")
+@Profile("!integration")
 public class SecurityAuditorAware implements AuditorAware<Long> {
 
     @Override

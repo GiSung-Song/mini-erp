@@ -1,6 +1,8 @@
 package com.erp.mini.purchase.domain;
 
 import com.erp.mini.common.entity.BaseEntity;
+import com.erp.mini.common.response.BusinessException;
+import com.erp.mini.common.response.ErrorCode;
 import com.erp.mini.item.domain.Item;
 import com.erp.mini.partner.domain.Partner;
 import com.erp.mini.warehouse.domain.Warehouse;
@@ -54,10 +56,10 @@ public class PurchaseOrder extends BaseEntity {
     }
 
     public void addLine(Item item, Warehouse warehouse, long qty, BigDecimal unitCost) {
-        ensureEditable();
+        ensureCreated();
 
         if (containsLine(item, warehouse)) {
-            throw new IllegalStateException("이미 존재하는 상품/창고 라인이 존재합니다.");
+            throw new BusinessException(ErrorCode.CONFLICT, "이미 존재하는 상품/창고 라인이 존재합니다.");
         }
 
         PurchaseOrderLine line = PurchaseOrderLine.createPurchaseOrderLine(
@@ -67,14 +69,57 @@ public class PurchaseOrder extends BaseEntity {
         purchaseOrderLines.add(line);
     }
 
+    public void removeLine(Long lineId) {
+        ensureCreated();
+
+        PurchaseOrderLine purchaseOrderLine = purchaseOrderLines.stream()
+                .filter(line -> line.getId().equals(lineId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "라인이 존재하지 않습니다."));
+
+        purchaseOrderLines.remove(purchaseOrderLine);
+    }
+
+    public void cancel() {
+        ensureCancellable();
+        this.status = PurchaseStatus.CANCELLED;
+    }
+
+    public void markAsOrdered() {
+        ensureCreated();
+
+        if (purchaseOrderLines.isEmpty()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "최소 1개 이상의 라인이 필요합니다.");
+        }
+
+        this.status = PurchaseStatus.ORDERED;
+    }
+
+    public void markAsReceived() {
+        ensureOrdered();
+        this.status = PurchaseStatus.RECEIVED;
+    }
+
     private boolean containsLine(Item item, Warehouse warehouse) {
         return purchaseOrderLines.stream()
                 .anyMatch(l -> l.sameKey(item, warehouse));
     }
 
-    private void ensureEditable() {
+    private void ensureCreated() {
         if (status != PurchaseStatus.CREATED) {
-            throw new  IllegalStateException("생성된 발주만 추가 가능합니다.");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "생성된 발주만 변경 가능합니다.");
+        }
+    }
+
+    private void ensureCancellable() {
+        if (status == PurchaseStatus.RECEIVED || status == PurchaseStatus.CANCELLED) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "취소할 수 없는 상태입니다.");
+        }
+    }
+
+    private void ensureOrdered() {
+        if (status != PurchaseStatus.ORDERED) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "발주 확정 상태에서만 입고 처리할 수 있습니다.");
         }
     }
 }
