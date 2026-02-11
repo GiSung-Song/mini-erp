@@ -70,4 +70,16 @@ public class Partner extends BaseEntity {
     public void changeEmail(String email) {
         this.email = email;
     }
+
+    public void validateSupplier() {
+        if (this.type != PartnerType.SUPPLIER) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "해당 거래처는 고객사입니다.");
+        }
+    }
+
+    public void validateCustomer() {
+        if (this.type != PartnerType.CUSTOMER) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "해당 거래처는 공급처입니다.");
+        }
+    }
 }

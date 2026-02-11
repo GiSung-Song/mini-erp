@@ -13,9 +13,22 @@ ON DUPLICATE KEY UPDATE id = id;
 INSERT INTO items (id, name, code, base_price, status, created_by, updated_by)
 VALUES (
     1,
-    '테스트 아이템',
-    'ITEM_TEST',
+    '테스트 아이템1',
+    'ITEM_TEST1',
     1000,
+    'ACTIVE',
+    1,
+    1
+)
+ON DUPLICATE KEY UPDATE id = id;
+
+-- 테스트 아이템
+INSERT INTO items (id, name, code, base_price, status, created_by, updated_by)
+VALUES (
+    2,
+    '테스트 아이템2',
+    'ITEM_TEST2',
+    2000,
     'ACTIVE',
     1,
     1

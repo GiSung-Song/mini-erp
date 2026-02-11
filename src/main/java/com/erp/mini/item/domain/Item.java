@@ -1,6 +1,8 @@
 package com.erp.mini.item.domain;
 
 import com.erp.mini.common.entity.BaseEntity;
+import com.erp.mini.common.response.BusinessException;
+import com.erp.mini.common.response.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -52,5 +54,11 @@ public class Item extends BaseEntity {
 
     public void changePrice(BigDecimal basePrice) {
         this.basePrice = basePrice;
+    }
+
+    public void ensureAvailable() {
+        if (status == ItemStatus.INACTIVE) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "해당 상품은 비활성화 상태입니다.");
+        }
     }
 }
