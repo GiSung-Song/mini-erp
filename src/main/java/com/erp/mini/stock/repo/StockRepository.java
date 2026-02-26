@@ -1,15 +1,15 @@
 package com.erp.mini.stock.repo;
 
-import com.erp.mini.stock.domain.Stock;
-import com.erp.mini.stock.dto.StockKey;
-import io.lettuce.core.dynamic.annotation.Param;
-import jakarta.persistence.LockModeType;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
-import java.util.Optional;
+import com.erp.mini.stock.domain.Stock;
+
+import io.lettuce.core.dynamic.annotation.Param;
+import jakarta.persistence.LockModeType;
 
 public interface StockRepository extends JpaRepository<Stock, Long>, StockRepositoryCustom {
     @Lock(LockModeType.PESSIMISTIC_WRITE)

@@ -213,7 +213,6 @@ public class PurchaseOrderIntegrationTest {
                 void add_purchase_order_fail_with_missing_fields() throws Exception {
                         PurchaseOrder purchaseOrder = purchaseOrderTestDataFactory.createPurchaseOrder();
                         Item newItem = createItem("ITEM2", "CODE2");
-                        Long warehouseId = purchaseOrder.getPurchaseOrderLines().get(0).getWarehouse().getId();
 
                         AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(
                                         newItem.getId(), null, BigDecimal.valueOf(2500), 10L);
