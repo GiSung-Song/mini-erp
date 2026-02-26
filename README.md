@@ -1,5 +1,5 @@
-# Mini ERP Backend
-내부용 미니 ERP 백엔드 프로젝트
+# Inventory & Order Management System 
+재고 중심 주문 관리 시스템입니다.
 
 ---
 ## 1. Tech Stack
@@ -17,5 +17,5 @@
 - Warehouses(창고)
 - Partners(거래처: supplier / customer)
 - Stocks(재고: item + warehouse 단위)
-- Sales Orders / Purchase Orders
-- Inventory Transactions(재고 원장)
+- SalesOrders(출고) / PurchaseOrders(입고)
+- InventoryTransactions(재고 원장)

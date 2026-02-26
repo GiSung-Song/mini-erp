@@ -8,6 +8,7 @@ import com.erp.mini.purchase.service.PurchaseOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/purchase-order")
+@Tag(name = "PurchaseOrder", description = "구매 발주 API")
 public class PurchaseOrderController {
 
     private final PurchaseOrderService purchaseOrderService;
@@ -83,6 +85,19 @@ public class PurchaseOrderController {
             @PathVariable Long purchaseOrderId
     ) {
         purchaseOrderService.cancelPurchase(purchaseOrderId);
+
+        return CustomResponse.ok();
+    }
+
+    @Operation(summary = "구매 주문 수령 완료", description = "구매 주문을 수령 완료한다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "수령 완료")
+    })
+    @PatchMapping("/{purchaseOrderId}/receive")
+    public ResponseEntity<CustomResponse<Void>> receivePurchase(
+            @PathVariable Long purchaseOrderId
+    ) {
+        purchaseOrderService.receive(purchaseOrderId);
 
         return CustomResponse.ok();
     }

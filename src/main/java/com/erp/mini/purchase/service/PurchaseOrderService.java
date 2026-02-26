@@ -7,14 +7,18 @@ import com.erp.mini.item.repo.ItemRepository;
 import com.erp.mini.partner.domain.Partner;
 import com.erp.mini.partner.repo.PartnerRepository;
 import com.erp.mini.purchase.domain.PurchaseOrder;
+import com.erp.mini.purchase.domain.PurchaseOrderLine;
 import com.erp.mini.purchase.dto.*;
 import com.erp.mini.purchase.repo.PurchaseOrderRepository;
+import com.erp.mini.stock.dto.StockKey;
+import com.erp.mini.stock.service.StockService;
 import com.erp.mini.warehouse.domain.Warehouse;
 import com.erp.mini.warehouse.repo.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +32,8 @@ public class PurchaseOrderService {
     private final ItemRepository itemRepository;
     private final PartnerRepository partnerRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
+
+    private final StockService stockService;
 
     // 구매 생성
     @Transactional
@@ -80,7 +86,7 @@ public class PurchaseOrderService {
     // 항목 추가
     @Transactional
     public void addOrderLine(Long purchaseOrderId, AddPurchaseOrderLineRequest request) {
-        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseOrderId)
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findByIdWithLines(purchaseOrderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "해당 구매건이 존재하지 않습니다."));
 
         Item item = itemRepository.findById(request.itemId())
@@ -101,7 +107,7 @@ public class PurchaseOrderService {
     // 항목 삭제
     @Transactional
     public void removePurchaseOrder(Long purchaseOrderId, Long purchaseOrderLineId) {
-        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseOrderId)
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findByIdWithLines(purchaseOrderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "해당 구매건이 존재하지 않습니다."));
 
         purchaseOrder.removeLine(purchaseOrderLineId);
@@ -140,5 +146,22 @@ public class PurchaseOrderService {
         return new PurchaseDetailResponse(header, lines);
     }
 
-    // TODO: 수령 완료(stock + inventory_transaction) 연계 대상
+    // 입고 완료
+    @Transactional
+    public void receive(Long purchaseOrderId) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findByIdWithLines(purchaseOrderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "해당 구매건이 존재하지 않습니다."));
+
+        // (itemId, warehouseId), qty 조합으로 Map 생성
+        Map<StockKey, Long> lineMap = purchaseOrder.getPurchaseOrderLines().stream()
+                .collect(Collectors.toMap(
+                        l -> new StockKey(l.getItem().getId(), l.getWarehouse().getId()),
+                        PurchaseOrderLine::getQty,
+                        Long::sum
+                ));
+
+        stockService.increase(lineMap, purchaseOrderId);
+
+        purchaseOrder.markAsReceived();
+    }
 }

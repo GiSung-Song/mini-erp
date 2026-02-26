@@ -1,13 +1,13 @@
 package com.erp.mini.util;
 
-import com.erp.mini.common.security.CustomUserDetails;
+import java.util.List;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import java.util.List;
+import com.erp.mini.common.security.CustomUserDetails;
 
 public class CustomMockUserFactory implements WithSecurityContextFactory<CustomMockUser> {
 

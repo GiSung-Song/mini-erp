@@ -44,13 +44,21 @@ public class SalesOrder extends BaseEntity {
     )
     private final List<SalesOrderLine> salesOrderLines = new ArrayList<>();
 
-    private SalesOrder(Partner partner) {
+    @Embedded
+    private OrderCustomerInfo orderCustomerInfo;
+
+    @Embedded
+    private ShippingAddress shippingAddress;
+
+    private SalesOrder(Partner partner, OrderCustomerInfo orderCustomerInfo, ShippingAddress shippingAddress) {
         this.partner = partner;
         this.status = SalesStatus.CREATED;
+        this.orderCustomerInfo = orderCustomerInfo;
+        this.shippingAddress = shippingAddress;
     }
 
-    public static SalesOrder createSalesOrder(Partner partner) {
-        return new SalesOrder(partner);
+    public static SalesOrder createSalesOrder(Partner partner, OrderCustomerInfo orderCustomerInfo, ShippingAddress shippingAddress) {
+        return new SalesOrder(partner, orderCustomerInfo, shippingAddress);
     }
 
     public void addLine(Item item, Warehouse warehouse, long qty, BigDecimal unitPrice) {
@@ -84,18 +92,25 @@ public class SalesOrder extends BaseEntity {
     }
 
     public void markAsOrdered() {
+        availableOrder();
+        this.status = SalesStatus.ORDERED;
+    }
+
+    public void availableOrder() {
         ensureCreated();
 
         if (salesOrderLines.isEmpty()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "최소 1개 이상의 라인이 필요합니다.");
         }
-
-        this.status = SalesStatus.ORDERED;
     }
 
     public void markAsShipped() {
         ensureOrdered();
         this.status = SalesStatus.SHIPPED;
+    }
+
+    public boolean isOrdered() {
+        return this.status == SalesStatus.ORDERED;
     }
 
     private boolean containsLine(Item item, Warehouse warehouse) {
@@ -117,7 +132,7 @@ public class SalesOrder extends BaseEntity {
 
     private void ensureOrdered() {
         if (status != SalesStatus.ORDERED) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "발주 확정 상태에서만 출고 처리할 수 있습니다.");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "발주 확정 상태에서만 배송 완료 처리를 할 수 있습니다.");
         }
     }
 }

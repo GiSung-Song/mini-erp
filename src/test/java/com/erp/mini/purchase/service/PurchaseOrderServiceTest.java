@@ -1,19 +1,16 @@
 package com.erp.mini.purchase.service;
 
-import com.erp.mini.common.response.BusinessException;
-import com.erp.mini.item.domain.Item;
-import com.erp.mini.item.domain.ItemFixture;
-import com.erp.mini.item.repo.ItemRepository;
-import com.erp.mini.partner.domain.Partner;
-import com.erp.mini.partner.domain.PartnerFixture;
-import com.erp.mini.partner.domain.PartnerType;
-import com.erp.mini.partner.repo.PartnerRepository;
-import com.erp.mini.purchase.domain.*;
-import com.erp.mini.purchase.dto.*;
-import com.erp.mini.purchase.repo.PurchaseOrderRepository;
-import com.erp.mini.warehouse.domain.Warehouse;
-import com.erp.mini.warehouse.domain.WarehouseFixture;
-import com.erp.mini.warehouse.repo.WarehouseRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,16 +20,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import com.erp.mini.common.response.BusinessException;
+import com.erp.mini.item.domain.Item;
+import com.erp.mini.item.domain.ItemFixture;
+import com.erp.mini.item.repo.ItemRepository;
+import com.erp.mini.partner.domain.Partner;
+import com.erp.mini.partner.domain.PartnerFixture;
+import com.erp.mini.partner.domain.PartnerType;
+import com.erp.mini.partner.repo.PartnerRepository;
+import com.erp.mini.purchase.domain.PurchaseOrder;
+import com.erp.mini.purchase.domain.PurchaseOrderFixture;
+import com.erp.mini.purchase.domain.PurchaseOrderLine;
+import com.erp.mini.purchase.domain.PurchaseStatus;
+import com.erp.mini.purchase.dto.AddPurchaseOrderLineRequest;
+import com.erp.mini.purchase.dto.PurchaseDetailResponse;
+import com.erp.mini.purchase.dto.PurchaseHeaderDto;
+import com.erp.mini.purchase.dto.PurchaseLineDto;
+import com.erp.mini.purchase.dto.PurchaseOrderRequest;
+import com.erp.mini.purchase.repo.PurchaseOrderRepository;
+import com.erp.mini.warehouse.domain.Warehouse;
+import com.erp.mini.warehouse.domain.WarehouseFixture;
+import com.erp.mini.warehouse.repo.WarehouseRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PurchaseOrderServiceTest {
@@ -57,8 +65,7 @@ class PurchaseOrderServiceTest {
         @Test
         void add_purchase_success() {
             Partner partner = PartnerFixture.create(
-                    "공급처", "SUP000001", PartnerType.SUPPLIER, null, null
-            );
+                    "공급처", "SUP000001", PartnerType.SUPPLIER, null, null);
             given(partnerRepository.findById(1L)).willReturn(Optional.of(partner));
 
             Item item = ItemFixture.create();
@@ -71,9 +78,7 @@ class PurchaseOrderServiceTest {
                     1L,
                     List.of(
                             new PurchaseOrderRequest.PurchaseLine(
-                                    item.getId(), warehouse.getId(), BigDecimal.valueOf(1000), 5)
-                    )
-            );
+                                    item.getId(), warehouse.getId(), BigDecimal.valueOf(1000), 5L)));
 
             // when
             purchaseOrderService.createPurchase(request);
@@ -84,16 +89,13 @@ class PurchaseOrderServiceTest {
 
         @Test
         void add_purchase_fail_with_partner_not_found() {
-            Partner partner = PartnerFixture.create();
             given(partnerRepository.findById(1L)).willReturn(Optional.empty());
 
             PurchaseOrderRequest request = new PurchaseOrderRequest(
                     1L,
                     List.of(
                             new PurchaseOrderRequest.PurchaseLine(
-                                    1L, 1L, BigDecimal.valueOf(1000), 5)
-                    )
-            );
+                                    1L, 1L, BigDecimal.valueOf(1000), 5L)));
 
             assertThatThrownBy(() -> purchaseOrderService.createPurchase(request))
                     .isInstanceOf(BusinessException.class)
@@ -107,8 +109,7 @@ class PurchaseOrderServiceTest {
         @Test
         void add_purchase_fail_with_item_not_found() {
             Partner partner = PartnerFixture.create(
-                    "공급처", "SUP000001", PartnerType.SUPPLIER, null, null
-            );
+                    "공급처", "SUP000001", PartnerType.SUPPLIER, null, null);
             given(partnerRepository.findById(1L)).willReturn(Optional.of(partner));
 
             Item item = ItemFixture.create();
@@ -120,10 +121,8 @@ class PurchaseOrderServiceTest {
             PurchaseOrderRequest request = new PurchaseOrderRequest(
                     1L,
                     List.of(
-                            new PurchaseOrderRequest.PurchaseLine(1L, 2L, BigDecimal.valueOf(1000), 5),
-                            new PurchaseOrderRequest.PurchaseLine(2L, 2L, BigDecimal.valueOf(2000), 5)
-                    )
-            );
+                            new PurchaseOrderRequest.PurchaseLine(1L, 2L, BigDecimal.valueOf(1000), 5L),
+                            new PurchaseOrderRequest.PurchaseLine(2L, 2L, BigDecimal.valueOf(2000), 5L)));
 
             assertThatThrownBy(() -> purchaseOrderService.createPurchase(request))
                     .isInstanceOf(BusinessException.class)
@@ -136,8 +135,7 @@ class PurchaseOrderServiceTest {
         @Test
         void add_purchase_fail_with_warehouse_not_found() {
             Partner partner = PartnerFixture.create(
-                    "공급처", "SUP000001", PartnerType.SUPPLIER, null, null
-            );
+                    "공급처", "SUP000001", PartnerType.SUPPLIER, null, null);
             given(partnerRepository.findById(1L)).willReturn(Optional.of(partner));
 
             Item item = ItemFixture.create();
@@ -150,10 +148,8 @@ class PurchaseOrderServiceTest {
             PurchaseOrderRequest request = new PurchaseOrderRequest(
                     1L,
                     List.of(
-                            new PurchaseOrderRequest.PurchaseLine(1L, 1L, BigDecimal.valueOf(1000), 5),
-                            new PurchaseOrderRequest.PurchaseLine(2L, 2L, BigDecimal.valueOf(2000), 5)
-                    )
-            );
+                            new PurchaseOrderRequest.PurchaseLine(1L, 1L, BigDecimal.valueOf(1000), 5L),
+                            new PurchaseOrderRequest.PurchaseLine(2L, 2L, BigDecimal.valueOf(2000), 5L)));
 
             assertThatThrownBy(() -> purchaseOrderService.createPurchase(request))
                     .isInstanceOf(BusinessException.class)
@@ -173,12 +169,12 @@ class PurchaseOrderServiceTest {
             Warehouse warehouse = WarehouseFixture.create();
             PurchaseOrder purchaseOrder = PurchaseOrderFixture.create(partner);
 
-            given(purchaseOrderRepository.findById(1L)).willReturn(Optional.of(purchaseOrder));
+            given(purchaseOrderRepository.findByIdWithLines(1L)).willReturn(Optional.of(purchaseOrder));
             given(itemRepository.findById(any())).willReturn(Optional.of(item));
             given(warehouseRepository.findById(any())).willReturn(Optional.of(warehouse));
 
-            AddPurchaseOrderLineRequest request =
-                    new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000), 10);
+            AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000),
+                    10L);
 
             purchaseOrderService.addOrderLine(1L, request);
 
@@ -187,10 +183,10 @@ class PurchaseOrderServiceTest {
 
         @Test
         void add_line_fail_with_purchase_order_not_found() {
-            given(purchaseOrderRepository.findById(1L)).willReturn(Optional.empty());
+            given(purchaseOrderRepository.findByIdWithLines(1L)).willReturn(Optional.empty());
 
-            AddPurchaseOrderLineRequest request =
-                    new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000), 10);
+            AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000),
+                    10L);
 
             assertThatThrownBy(() -> purchaseOrderService.addOrderLine(1L, request))
                     .isInstanceOf(BusinessException.class)
@@ -205,11 +201,11 @@ class PurchaseOrderServiceTest {
             Partner partner = PartnerFixture.create();
             PurchaseOrder purchaseOrder = PurchaseOrderFixture.create(partner);
 
-            given(purchaseOrderRepository.findById(1L)).willReturn(Optional.of(purchaseOrder));
+            given(purchaseOrderRepository.findByIdWithLines(1L)).willReturn(Optional.of(purchaseOrder));
             given(itemRepository.findById(any())).willReturn(Optional.empty());
 
-            AddPurchaseOrderLineRequest request =
-                    new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000), 10);
+            AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000),
+                    10L);
 
             assertThatThrownBy(() -> purchaseOrderService.addOrderLine(1L, request))
                     .isInstanceOf(BusinessException.class)
@@ -225,11 +221,11 @@ class PurchaseOrderServiceTest {
             Item item = ItemFixture.create();
             PurchaseOrder purchaseOrder = PurchaseOrderFixture.create(partner);
 
-            given(purchaseOrderRepository.findById(1L)).willReturn(Optional.of(purchaseOrder));
+            given(purchaseOrderRepository.findByIdWithLines(1L)).willReturn(Optional.of(purchaseOrder));
             given(itemRepository.findById(any())).willReturn(Optional.of(item));
 
-            AddPurchaseOrderLineRequest request =
-                    new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000), 10);
+            AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(1L, 1L, BigDecimal.valueOf(1000),
+                    10L);
 
             assertThatThrownBy(() -> purchaseOrderService.addOrderLine(1L, request))
                     .isInstanceOf(BusinessException.class)
@@ -254,7 +250,7 @@ class PurchaseOrderServiceTest {
             PurchaseOrderLine purchaseOrderLine = purchaseOrder.getPurchaseOrderLines().get(0);
             ReflectionTestUtils.setField(purchaseOrderLine, "id", 1L);
 
-            given(purchaseOrderRepository.findById(1L)).willReturn(Optional.of(purchaseOrder));
+            given(purchaseOrderRepository.findByIdWithLines(1L)).willReturn(Optional.of(purchaseOrder));
             purchaseOrderService.removePurchaseOrder(1L, 1L);
 
             assertThat(purchaseOrder.getPurchaseOrderLines()).isEmpty();
@@ -262,7 +258,7 @@ class PurchaseOrderServiceTest {
 
         @Test
         void remove_line_fail_with_purchase_order_not_found() {
-            given(purchaseOrderRepository.findById(1L)).willReturn(Optional.empty());
+            given(purchaseOrderRepository.findByIdWithLines(1L)).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> purchaseOrderService.removePurchaseOrder(1L, 1L))
                     .isInstanceOf(BusinessException.class)
@@ -310,7 +306,7 @@ class PurchaseOrderServiceTest {
             Partner partner = PartnerFixture.create();
             PurchaseOrder purchaseOrder = PurchaseOrderFixture.create(partner);
 
-            given(purchaseOrderRepository.findById(1L)).willReturn(Optional.of(purchaseOrder));
+            given(purchaseOrderRepository.findById(purchaseOrder.getId())).willReturn(Optional.of(purchaseOrder));
 
             purchaseOrderService.cancelPurchase(purchaseOrder.getId());
             assertThat(purchaseOrder.getStatus()).isEqualTo(PurchaseStatus.CANCELLED);

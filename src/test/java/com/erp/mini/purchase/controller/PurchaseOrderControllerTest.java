@@ -47,7 +47,7 @@ class PurchaseOrderControllerTest {
                     1L,
                     List.of(
                             new PurchaseOrderRequest.PurchaseLine(
-                                    1L, 1L, BigDecimal.valueOf(1000), 5)
+                                    1L, 1L, BigDecimal.valueOf(1000), 5L)
                     )
             );
 
@@ -64,7 +64,7 @@ class PurchaseOrderControllerTest {
                     1L,
                     List.of(
                             new PurchaseOrderRequest.PurchaseLine(
-                                    1L, null, BigDecimal.valueOf(1000), 5)
+                                    1L, null, BigDecimal.valueOf(1000), 5L)
                     )
             );
 
@@ -82,7 +82,7 @@ class PurchaseOrderControllerTest {
         @Test
         void add_purchase_order_success() throws Exception {
             AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(
-                    1L, 1L, BigDecimal.valueOf(1000), 5
+                    1L, 1L, BigDecimal.valueOf(1000), 5L
             );
 
             mockMvc.perform(post("/api/purchase-order/{purchaseOrderId}", 1)
@@ -95,7 +95,7 @@ class PurchaseOrderControllerTest {
         @Test
         void add_purchase_order_fail_with_missing_fields() throws Exception {
             AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(
-                    null, 1L, BigDecimal.valueOf(1000), 5
+                    null, 1L, BigDecimal.valueOf(1000), 5L
             );
 
             mockMvc.perform(post("/api/purchase-order/{purchaseOrderId}", 1)
@@ -108,7 +108,7 @@ class PurchaseOrderControllerTest {
         @Test
         void add_purchase_order_fail_with_invalid_path_variable() throws Exception {
             AddPurchaseOrderLineRequest request = new AddPurchaseOrderLineRequest(
-                    1L, 1L, BigDecimal.valueOf(1000), 5
+                    1L, 1L, BigDecimal.valueOf(1000), 5L
             );
 
             mockMvc.perform(post("/api/purchase-order/{purchaseOrderId}", "43214231L")

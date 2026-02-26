@@ -1,7 +1,8 @@
 package com.erp.mini.warehouse.repo;
 
+import com.erp.mini.common.config.JpaConfig;
+import com.erp.mini.util.TestAuditorConfig;
 import com.erp.mini.util.TestContainerManager;
-import com.erp.mini.util.TestJpaConfig;
 import com.erp.mini.util.TestQuerydslConfig;
 import com.erp.mini.warehouse.domain.Warehouse;
 import com.erp.mini.warehouse.domain.WarehouseStatus;
@@ -9,7 +10,6 @@ import com.erp.mini.warehouse.dto.SearchWarehouseCondition;
 import com.erp.mini.warehouse.dto.SearchWarehouseResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({WarehouseRepositoryImpl.class, TestJpaConfig.class, TestQuerydslConfig.class})
+@Import({WarehouseRepositoryImpl.class, JpaConfig.class, TestAuditorConfig.class, TestQuerydslConfig.class})
 @ActiveProfiles("integration")
 class WarehouseRepositoryImplTest {
 

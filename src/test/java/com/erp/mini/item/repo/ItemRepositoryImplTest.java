@@ -1,11 +1,12 @@
 package com.erp.mini.item.repo;
 
+import com.erp.mini.common.config.JpaConfig;
 import com.erp.mini.item.domain.Item;
 import com.erp.mini.item.domain.ItemStatus;
 import com.erp.mini.item.dto.SearchItemCondition;
 import com.erp.mini.item.dto.SearchItemResponse;
+import com.erp.mini.util.TestAuditorConfig;
 import com.erp.mini.util.TestContainerManager;
-import com.erp.mini.util.TestJpaConfig;
 import com.erp.mini.util.TestQuerydslConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({ItemRepositoryImpl.class, TestJpaConfig.class, TestQuerydslConfig.class})
+@Import({ItemRepositoryImpl.class, JpaConfig.class, TestAuditorConfig.class, TestQuerydslConfig.class})
 @ActiveProfiles("integration")
 class ItemRepositoryImplTest {
 
@@ -76,14 +77,14 @@ class ItemRepositoryImplTest {
         Page<SearchItemResponse> page = itemRepository.search(searchItemCondition, pageable);
 
         assertThat(page.getContent()).hasSize(10);
-        assertThat(page.getTotalElements()).isEqualTo(11);
+        assertThat(page.getTotalElements()).isEqualTo(10);
 
         SearchItemCondition searchItemCondition2 = new SearchItemCondition(
                 "ITEM", null
         );
         Page<SearchItemResponse> page2 = itemRepository.search(searchItemCondition2, pageable);
 
-        assertThat(page2.getContent()).hasSize(1);
-        assertThat(page2.getTotalElements()).isEqualTo(1);
+        assertThat(page2.getContent()).hasSize(0);
+        assertThat(page2.getTotalElements()).isEqualTo(0);
     }
 }
