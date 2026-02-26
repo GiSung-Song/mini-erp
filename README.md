@@ -61,6 +61,8 @@
 
 (전체 목록은 Swagger/OpenAPI 문서에서 확인 가능)
 
+---
+
 ## 아키텍처 & 설계
 - 표준적인 레이어드(Spring MVC → Service → Repository) 구조
 - DTO 매핑, 글로벌 예외 핸들러
