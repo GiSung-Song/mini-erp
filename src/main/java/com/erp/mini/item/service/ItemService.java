@@ -55,36 +55,6 @@ public class ItemService {
         return PageResponse.from(contents);
     }
 
-    // TODO: 추후에 입고, 출고, 재고 등 도메인 로직 완성되면 테스트 예정
-    // 상품 상세 조회
-    @Transactional(readOnly = true)
-    public ItemDetailResponse getItemDetail(Long itemId) {
-        List<ItemDetailDto> items = itemRepository.getItemDetail(itemId);
-
-        if (items.isEmpty()) {
-            throw new BusinessException(ErrorCode.NOT_FOUND, "해당 상품이 존재하지 않습니다.");
-        }
-
-        ItemDetailDto firstRow = items.get(0);
-
-        List<ItemDetailResponse.WarehouseStock> stocks = items.stream()
-                .filter(r -> r.warehouseId() != null)
-                .map(r -> new ItemDetailResponse.WarehouseStock(
-                        r.warehouseId(),
-                        r.warehouseName(),
-                        Optional.ofNullable(r.quantity()).orElse(0)
-                ))
-                .toList();
-
-        return new ItemDetailResponse(
-                firstRow.itemId(),
-                firstRow.itemName(),
-                firstRow.itemCode(),
-                firstRow.status(),
-                stocks
-        );
-    }
-
     // 수정 (가격 변동)
     @Transactional
     public void changePrice(Long itemId, ChangeItemPriceRequest request) {

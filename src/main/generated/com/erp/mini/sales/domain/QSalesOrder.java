@@ -32,9 +32,13 @@ public class QSalesOrder extends EntityPathBase<SalesOrder> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final QOrderCustomerInfo orderCustomerInfo;
+
     public final com.erp.mini.partner.domain.QPartner partner;
 
     public final ListPath<SalesOrderLine, QSalesOrderLine> salesOrderLines = this.<SalesOrderLine, QSalesOrderLine>createList("salesOrderLines", SalesOrderLine.class, QSalesOrderLine.class, PathInits.DIRECT2);
+
+    public final QShippingAddress shippingAddress;
 
     public final EnumPath<SalesStatus> status = createEnum("status", SalesStatus.class);
 
@@ -62,7 +66,9 @@ public class QSalesOrder extends EntityPathBase<SalesOrder> {
 
     public QSalesOrder(Class<? extends SalesOrder> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.orderCustomerInfo = inits.isInitialized("orderCustomerInfo") ? new QOrderCustomerInfo(forProperty("orderCustomerInfo")) : null;
         this.partner = inits.isInitialized("partner") ? new com.erp.mini.partner.domain.QPartner(forProperty("partner")) : null;
+        this.shippingAddress = inits.isInitialized("shippingAddress") ? new QShippingAddress(forProperty("shippingAddress")) : null;
     }
 
 }

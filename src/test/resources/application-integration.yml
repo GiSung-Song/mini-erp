@@ -1,4 +1,7 @@
 spring:
+  datasource:
+    hikari:
+      maximumPoolSize: 5
   data:
     redis:
       host: localhost

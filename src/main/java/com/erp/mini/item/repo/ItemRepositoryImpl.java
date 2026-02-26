@@ -1,6 +1,5 @@
 package com.erp.mini.item.repo;
 
-import com.erp.mini.item.dto.ItemDetailDto;
 import com.erp.mini.item.dto.SearchItemCondition;
 import com.erp.mini.item.dto.SearchItemResponse;
 import com.querydsl.core.types.Projections;
@@ -14,8 +13,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 import static com.erp.mini.item.domain.QItem.item;
-import static com.erp.mini.stock.domain.QStock.stock;
-import static com.erp.mini.warehouse.domain.QWarehouse.warehouse;
 import static org.springframework.util.StringUtils.hasText;
 
 @RequiredArgsConstructor
@@ -53,26 +50,6 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .fetchOne();
 
         return new PageImpl<>(contents, pageable, total == null ? 0 : total);
-    }
-
-    @Override
-    public List<ItemDetailDto> getItemDetail(Long itemId) {
-        return jpaQueryFactory
-                .select(Projections.constructor(
-                        ItemDetailDto.class,
-                        item.id,
-                        item.name,
-                        item.code,
-                        item.status,
-                        warehouse.id,
-                        warehouse.name,
-                        stock.qty
-                ))
-                .from(item)
-                .leftJoin(stock).on(stock.item.id.eq(item.id))
-                .leftJoin(warehouse).on(stock.warehouse.id.eq(warehouse.id))
-                .where(item.id.eq(itemId))
-                .fetch();
     }
 
     private BooleanExpression nameStarts(String name) {

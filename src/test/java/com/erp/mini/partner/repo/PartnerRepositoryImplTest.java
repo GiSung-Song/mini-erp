@@ -1,11 +1,12 @@
 package com.erp.mini.partner.repo;
 
+import com.erp.mini.common.config.JpaConfig;
 import com.erp.mini.partner.domain.Partner;
 import com.erp.mini.partner.domain.PartnerType;
 import com.erp.mini.partner.dto.SearchPartnerCondition;
 import com.erp.mini.partner.dto.SearchPartnerResponse;
+import com.erp.mini.util.TestAuditorConfig;
 import com.erp.mini.util.TestContainerManager;
-import com.erp.mini.util.TestJpaConfig;
 import com.erp.mini.util.TestQuerydslConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,7 +26,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({PartnerRepositoryImpl.class, TestJpaConfig.class, TestQuerydslConfig.class})
+@Import({PartnerRepositoryImpl.class, JpaConfig.class, TestAuditorConfig.class, TestQuerydslConfig.class})
 @ActiveProfiles("integration")
 class PartnerRepositoryImplTest {
 

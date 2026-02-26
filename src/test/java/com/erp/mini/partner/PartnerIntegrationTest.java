@@ -1,5 +1,25 @@
 package com.erp.mini.partner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItems;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+
 import com.erp.mini.partner.domain.Partner;
 import com.erp.mini.partner.domain.PartnerType;
 import com.erp.mini.partner.dto.AddPartnerRequest;
@@ -7,37 +27,15 @@ import com.erp.mini.partner.dto.UpdatePartnerRequest;
 import com.erp.mini.partner.repo.PartnerRepository;
 import com.erp.mini.user.domain.User;
 import com.erp.mini.user.domain.UserTestDataFactory;
+import com.erp.mini.util.IntegrationTest;
 import com.erp.mini.util.TestContainerManager;
 import com.erp.mini.util.TestLoginUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
-@Tag("integration")
-@AutoConfigureMockMvc
-@SpringBootTest
-@Transactional
-@ActiveProfiles("integration")
+@IntegrationTest
 public class PartnerIntegrationTest {
 
     @Autowired
@@ -51,6 +49,9 @@ public class PartnerIntegrationTest {
 
     @Autowired
     private PartnerRepository partnerRepository;
+
+    @PersistenceContext
+    private EntityManager em;
 
     private Authentication auth;
 
@@ -73,13 +74,12 @@ public class PartnerIntegrationTest {
             partnerRepository.deleteAll();
 
             AddPartnerRequest request = new AddPartnerRequest(
-                    "기성식품", PartnerType.CUSTOMER, null, null
-            );
+                    "기성식품", PartnerType.CUSTOMER, null, null);
 
             mockMvc.perform(post("/api/partner")
-                            .with(authentication(auth))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                    .with(authentication(auth))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
                     .andDo(print());
 
@@ -95,8 +95,10 @@ public class PartnerIntegrationTest {
     class update_partner_test {
         @Test
         void update_partner_success() throws Exception {
-            Partner supplier = partnerRepository.findById(1L)
-                    .orElseThrow();
+            Partner supplier = Partner.createPartner("TEST_SUP_001", PartnerType.SUPPLIER, "01012345678",
+                    "test@supplier.com");
+            partnerRepository.save(supplier);
+            em.flush();
 
             assertThat(supplier.getPhone()).isNotNull();
             assertThat(supplier.getEmail()).isEqualTo("test@supplier.com");
@@ -104,13 +106,13 @@ public class PartnerIntegrationTest {
             UpdatePartnerRequest request = new UpdatePartnerRequest("supplier@test.com", "");
 
             mockMvc.perform(patch("/api/partner/{partnerId}", supplier.getId())
-                            .with(authentication(auth))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                    .with(authentication(auth))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
                     .andDo(print());
 
-            Partner findPartner = partnerRepository.findById(1L)
+            Partner findPartner = partnerRepository.findById(supplier.getId())
                     .orElseThrow();
 
             assertThat(findPartner.getPhone()).isNull();
@@ -122,9 +124,9 @@ public class PartnerIntegrationTest {
             UpdatePartnerRequest request = new UpdatePartnerRequest("supplier@test.com", "");
 
             mockMvc.perform(patch("/api/partner/{partnerId}", 543254321432L)
-                            .with(authentication(auth))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                    .with(authentication(auth))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isNotFound())
                     .andDo(print());
         }
@@ -134,9 +136,14 @@ public class PartnerIntegrationTest {
     class search_partner_test {
         @Test
         void search_partner_success1() throws Exception {
+            Partner supplier = Partner.createPartner("테스트 공급사", PartnerType.SUPPLIER, "01099999999",
+                    "supplier@test.com");
+            partnerRepository.save(supplier);
+            em.flush();
+
             mockMvc.perform(get("/api/partner")
-                            .param("keyword", "테스트 공급")
-                            .with(authentication(auth)))
+                    .param("keyword", "테스트 공급")
+                    .with(authentication(auth)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.content[0].name").value("테스트 공급사"))
                     .andExpect(jsonPath("$.data.pageInfo.size").value("10"))
@@ -146,9 +153,18 @@ public class PartnerIntegrationTest {
 
         @Test
         void search_partner_success2() throws Exception {
+            Partner supplier = Partner.createPartner("테스트 공급사", PartnerType.SUPPLIER, "01088888888",
+                    "supplier1@test.com");
+            partnerRepository.save(supplier);
+
+            Partner customer = Partner.createPartner("테스트 고객사", PartnerType.CUSTOMER, "01077777777",
+                    "customer1@test.com");
+            partnerRepository.save(customer);
+            em.flush();
+
             mockMvc.perform(get("/api/partner")
-                            .param("keyword", "테스트")
-                            .with(authentication(auth)))
+                    .param("keyword", "테스트")
+                    .with(authentication(auth)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.content[*].name", hasItems("테스트 공급사", "테스트 고객사")))
                     .andExpect(jsonPath("$.data.pageInfo.size").value("10"))

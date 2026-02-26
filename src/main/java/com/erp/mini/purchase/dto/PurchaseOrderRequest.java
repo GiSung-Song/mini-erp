@@ -34,8 +34,9 @@ public record PurchaseOrderRequest(
             BigDecimal unitCost,
 
             @Schema(description = "수량", example = "100")
+            @NotNull(message = "수량은 필수입니다.")
             @Min(value = 1, message = "최소 1 이상입니다.")
-            long qty
+            Long qty
     ) {
     }
 }

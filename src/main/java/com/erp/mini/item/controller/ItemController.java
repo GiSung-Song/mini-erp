@@ -2,7 +2,10 @@ package com.erp.mini.item.controller;
 
 import com.erp.mini.common.response.CustomResponse;
 import com.erp.mini.common.response.PageResponse;
-import com.erp.mini.item.dto.*;
+import com.erp.mini.item.dto.AddItemRequest;
+import com.erp.mini.item.dto.ChangeItemPriceRequest;
+import com.erp.mini.item.dto.SearchItemCondition;
+import com.erp.mini.item.dto.SearchItemResponse;
 import com.erp.mini.item.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -64,18 +67,6 @@ public class ItemController {
         SearchItemCondition searchItemCondition = new SearchItemCondition(code, name);
 
         PageResponse<SearchItemResponse> response = itemService.getItemBySearch(searchItemCondition, pageable);
-
-        return CustomResponse.ok(response);
-    }
-
-    // 상품 상세 조회
-    @Operation(summary = "상품 상세 조회", description = "상품을 상세 조회한다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공")
-    })
-    @GetMapping("/{itemId}")
-    public ResponseEntity<CustomResponse<ItemDetailResponse>> getItemDetail(@PathVariable Long itemId) {
-        ItemDetailResponse response = itemService.getItemDetail(itemId);
 
         return CustomResponse.ok(response);
     }

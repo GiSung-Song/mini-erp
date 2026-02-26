@@ -7,6 +7,7 @@ import com.erp.mini.user.dto.AddUserRequest;
 import com.erp.mini.user.dto.ResetPasswordRequest;
 import com.erp.mini.user.dto.UpdatePasswordRequest;
 import com.erp.mini.user.repo.UserRepository;
+import com.erp.mini.util.IntegrationTest;
 import com.erp.mini.util.TestContainerManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Tag("integration")
-@AutoConfigureMockMvc
-@SpringBootTest
-@Transactional
-@ActiveProfiles("integration")
+@IntegrationTest
 public class UserIntegrationTest {
 
     @Autowired

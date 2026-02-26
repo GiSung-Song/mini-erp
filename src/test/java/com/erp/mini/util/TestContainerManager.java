@@ -15,7 +15,6 @@ public class TestContainerManager {
     public static final GenericContainer<?> REDIS = new GenericContainer<>(DockerImageName.parse("redis:latest"))
             .withExposedPorts(6379);
 
-
     private static volatile boolean mysqlStarted = false;
 
     public static void startMySQL() {
