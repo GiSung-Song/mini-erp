@@ -1,5 +1,11 @@
 package com.erp.mini.seed;
 
+import java.math.BigDecimal;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.erp.mini.common.security.CustomUserDetails;
 import com.erp.mini.item.domain.Item;
 import com.erp.mini.item.domain.ItemStatus;
@@ -12,12 +18,9 @@ import com.erp.mini.user.repo.UserRepository;
 import com.erp.mini.warehouse.domain.Warehouse;
 import com.erp.mini.warehouse.domain.WarehouseStatus;
 import com.erp.mini.warehouse.repo.WarehouseRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +32,9 @@ public class SeedService {
     private final ItemRepository itemRepository;
     private final WarehouseRepository warehouseRepository;
     private final PartnerRepository partnerRepository;
+    private final EntityManager em;
 
     private static final String ADMIN_EMP_NO = "admin";
-    private static final String ITEM_CODE = "item-code";
-    private static final String WH_CODE = "warehouse-code";
-    private static final String SUPPLIER_CODE = "supplier-code";
-    private static final String CUSTOMER_CODE = "customer-code";
 
     @Transactional
     public void seed() {
@@ -43,73 +43,62 @@ public class SeedService {
                         User.createUser(
                                 "관리자",
                                 ADMIN_EMP_NO,
-                                passwordEncoder.encode("admin1234")
-                        )
-                ));
+                                passwordEncoder.encode("admin1234"))));
 
         CustomUserDetails adminPrincipal = new CustomUserDetails(
                 admin.getId(),
                 admin.getEmployeeNumber(),
                 admin.getPassword(),
-                true
-        );
+                true);
 
         SecurityContextUtil.runAs(adminPrincipal, this::seedDomainData);
     }
 
     protected void seedDomainData() {
-        seedTestItem();
-        seedTestWarehouse();
-        seedTestSupplier();
-        seedTestCustomer();
+        seedBulkItems(10000);
+        seedBulkWarehouses(100);
+        seedBulkPartners(500, PartnerType.SUPPLIER, "SUP-");
+        seedBulkPartners(500, PartnerType.CUSTOMER, "CUS-");
     }
 
-    private void seedTestItem() {
-        if (itemRepository.existsByCode(ITEM_CODE)) return;
+    private void seedBulkItems(int count) {
+        if (itemRepository.count() > 0)
+            return;
 
-        itemRepository.save(
-                Item.createItem(
-                        "테스트 아이템", ITEM_CODE,
-                        BigDecimal.valueOf(1000), ItemStatus.ACTIVE
-                )
-        );
+        for (int i = 0; i < count; i++) {
+            itemRepository.save(
+                    Item.createItem(
+                            "상품-" + i,
+                            "ITEM-" + String.format("%06d", i),
+                            BigDecimal.valueOf(1000 + i),
+                            ItemStatus.ACTIVE));
+
+            if (i % 100 == 0) {
+                em.flush();
+                em.clear();
+            }
+        }
     }
 
-    private void seedTestWarehouse() {
-        if (warehouseRepository.existsByCode(WH_CODE)) return;
+    private void seedBulkWarehouses(int count) {
+        if (warehouseRepository.count() > 0)
+            return;
 
-        Warehouse warehouse = warehouseRepository.save(
-                Warehouse.createWarehouse(
-                        "테스트 1창고",
-                        "테스트시 테스트구 테스트동 테스트지역 12-34",
-                        WarehouseStatus.ACTIVE
-                )
-        );
-
-        warehouse.generateCode();
+        for (int i = 0; i < count; i++) {
+            Warehouse wh = warehouseRepository.save(Warehouse.createWarehouse(
+                    "창고-" + i, "테스트 주소 " + i, WarehouseStatus.ACTIVE));
+            wh.generateCode();
+        }
     }
 
-    private void seedTestSupplier() {
-        if (partnerRepository.existsByCode(SUPPLIER_CODE)) return;
-        Partner supplier = partnerRepository.save(
-                Partner.createPartner(
-                        "테스트 공급사", PartnerType.SUPPLIER,
-                        "01012344321", "test@supplier.com"
-                )
-        );
-
-        supplier.generateCode();
-    }
-
-    private void seedTestCustomer() {
-        if (partnerRepository.existsByCode(CUSTOMER_CODE)) return;
-        Partner customer = partnerRepository.save(
-                Partner.createPartner(
-                        "테스트 고객사", PartnerType.CUSTOMER,
-                        "01043211234", "test@customer.com"
-                )
-        );
-
-        customer.generateCode();
+    private void seedBulkPartners(int count, PartnerType type, String prefix) {
+        for (int i = 0; i < count; i++) {
+            Partner partner = partnerRepository.save(Partner.createPartner(
+                    type.name() + "-" + i,
+                    type,
+                    "010-0000-" + String.format("%04d", i),
+                    "test" + i + "@example.com"));
+            partner.generateCode();
+        }
     }
 }

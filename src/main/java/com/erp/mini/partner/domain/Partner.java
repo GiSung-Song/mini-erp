@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Table(
         name = "partners",
         uniqueConstraints = {@UniqueConstraint(name = "uq_partners_code", columnNames = {"code"})},
-        indexes = @Index(name = "idx_partners_name", columnList = "name")
+        indexes = {@Index(name = "idx_partners_name", columnList = "name"),
+                @Index(name = "idx_partners_type", columnList = "type")}
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

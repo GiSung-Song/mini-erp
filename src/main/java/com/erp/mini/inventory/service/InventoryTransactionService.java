@@ -1,5 +1,7 @@
 package com.erp.mini.inventory.service;
 
+import com.erp.mini.common.response.BusinessException;
+import com.erp.mini.common.response.ErrorCode;
 import com.erp.mini.common.response.PageResponse;
 import com.erp.mini.inventory.dto.ItxDetailResponse;
 import com.erp.mini.inventory.dto.ItxSearchCondition;
@@ -28,6 +30,12 @@ public class InventoryTransactionService {
 
     @Transactional(readOnly = true)
     public ItxDetailResponse getInventoryTransactionDetail(Long itxId) {
-        return inventoryTransactionRepository.findInventoryTransactionDetail(itxId);
+        ItxDetailResponse response = inventoryTransactionRepository.findInventoryTransactionDetail(itxId);
+
+        if (response == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "해당 재고 이력이 존재하지 않습니다.");
+        }
+
+        return response;
     }
 }
