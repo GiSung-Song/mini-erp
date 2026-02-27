@@ -44,18 +44,34 @@ public class StockService {
                     CannotAcquireLockException.class // 락 획득 실패 예외
             },
             maxAttempts = 3,
-            backoff = @Backoff(delay = 50)
+            backoff = @Backoff(delay = 100, random = true, multiplier = 2)
     )
     @Transactional
     public void increase(Map<StockKey, Long> lineMap, Long purchaseOrderId) {
         apply(lineMap, purchaseOrderId, TransactionType.INBOUND, true);
     }
 
+    @Retryable(
+            retryFor = {
+                    PessimisticLockingFailureException.class, // 데드락 + 락 충돌 예외
+                    CannotAcquireLockException.class // 락 획득 실패 예외
+            },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 100, random = true, multiplier = 2)
+    )
     @Transactional
     public void decrease(Map<StockKey, Long> lineMap, Long salesOrderId) {
         apply(lineMap, salesOrderId, TransactionType.OUTBOUND, false);
     }
 
+    @Retryable(
+            retryFor = {
+                    PessimisticLockingFailureException.class, // 데드락 + 락 충돌 예외
+                    CannotAcquireLockException.class // 락 획득 실패 예외
+            },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 100, random = true, multiplier = 2)
+    )
     @Transactional
     public void restore(Map<StockKey, Long> lineMap, Long salesOrderId) {
         apply(lineMap, salesOrderId, TransactionType.INBOUND, false);
